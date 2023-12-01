@@ -1,6 +1,7 @@
 """Testing the functions in test_2.py"""
 
 import pytest
+from unittest.mock import patch
 
 from test_2 import load_courts_near_postcode, load_people_from_csv, get_court_for_person, add_courts_for_all_people
 
@@ -59,6 +60,17 @@ def test_get_court_for_person_invalid_type():
 
     with pytest.raises(TypeError):
         get_court_for_person(person)
+
+
+def test_get_court_for_person_working():
+
+    person = {'person_name': 'ishika', 'home_postcode': 'LE23WL',
+              'looking_for_court_type': "Tribunal"}
+
+    result = get_court_for_person(person)
+
+    assert isinstance(result, dict) == True
+    assert len(result.keys()) == 6
 
 
 def test_add_courts_for_all_people_invalid_type():
