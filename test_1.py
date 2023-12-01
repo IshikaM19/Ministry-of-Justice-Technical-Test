@@ -1,4 +1,8 @@
+"""Script that validates log lines and converts each line into a dictionary"""
+
 from datetime import datetime
+
+VALID_LOG_LEVEL = ['INFO', 'WARNING', 'TRACE']
 
 
 def check_is_valid_timestamp(timestamp: str) -> bool:
@@ -46,8 +50,9 @@ def get_dict(line) -> dict:
         message = " ".join(parts[3:])
 
         if check_is_valid_timestamp(timestamp) and message:
-            if log_level in ["INFO", "WARNING", "TRACE"]:
+            if log_level in VALID_LOG_LEVEL:
                 return {"timestamp": timestamp, "log_level": log_level, "message": message}
+
 
 
 # YOU DON'T NEED TO CHANGE ANYTHING BELOW THIS LINE

@@ -1,3 +1,7 @@
+
+import requests
+import pandas as pd
+
 # A team of analysts wish to discover how far people are travelling to their nearest
 # desired court. We have provided you with a small test dataset so you can find out if
 # it is possible to give the analysts the data they need to do this. The data is in
@@ -59,6 +63,27 @@
 ]
 """
 
+
+def load_courts_near_postcode(postcode: str) -> list[dict]:
+    """Given a postcode, loads the top 10 nearest courts to that postcode"""
+
+    if not isinstance(postcode, str):
+        raise TypeError('The postcode must be a string')
+
+    url = f"https://www.find-court-tribunal.service.gov.uk/search/results.json?postcode={postcode}"
+
+    response = requests.get(url)
+
+    if response.status_code == 404:
+        raise ConnectionError('Not Found!')
+
+    if response.status_code == 500:
+        raise ConnectionError('Server Error')
+
+    if response.status_code == 200:
+        data = response.json()
+
+    return data
 # Use this API and the data in people.csv to determine how far each person's nearest
 # desired court is. Generate an output (of whatever format you feel is appropriate)
 # showing, for each person:
@@ -69,6 +94,19 @@
 # - the dx_number (if available) of the nearest court of the right type
 # - the distance to the nearest court of the right type
 
+
+def load_people_from_csv(filename: str) -> pd.DataFrame:
+    """Loads the people and their details from the csv into a dataframe"""
+
+    people = pd.read_csv(filename)
+
+    return people
+
+
 if __name__ == "__main__":
     # [TODO]: write your answer here
-    pass
+    courts = load_courts_near_postcode('LE23WL')
+
+    people = load_people_from_csv("people.csv")
+
+    print(people)
