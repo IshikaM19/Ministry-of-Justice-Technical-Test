@@ -10,12 +10,6 @@ import pandas as pd
 # - home_postcode
 # - looking_for_court_type
 
-# The courts and tribunals finder API returns a list of the 10 nearest courts to a
-# given postcode. The output is an array of objects in JSON format. The API is
-# accessed by including the postcode of interest in a URL. For example, accessing
-# https://courttribunalfinder.service.gov.uk/search/results.json?postcode=E144PU gives
-# the 10 nearest courts to the postcode E14 4PU. Visit the link to see an example of
-# the output.
 
 # Below is the first element of the JSON array from the above API call. We only want the
 # following keys from the json:
@@ -95,18 +89,60 @@ def load_courts_near_postcode(postcode: str) -> list[dict]:
 # - the distance to the nearest court of the right type
 
 
-def load_people_from_csv(filename: str) -> pd.DataFrame:
-    """Loads the people and their details from the csv into a dataframe"""
+def load_people_from_csv(filename: str) -> list[dict]:
+    """
+    Loads the people and their details from the csv as a list of dictionaries
+    Each person is a dictionary which has the keys: name, postcode and looking_for_court_type
+
+    """
 
     people = pd.read_csv(filename)
 
-    return people
+    return people.to_dict('records')
+
+
+def get_court_for_person(person: dict) -> dict:
+
+    postcode = person['home_postcode']
+    court_type_wanted = person['looking_for_court_type']
+
+    court_data = load_courts_near_postcode(postcode)
+
+    for court in court_data:
+        try:
+            court_type = court['types'][0]
+        except:
+            court_type = None
+
+        if court_type == court_type_wanted:
+            person['type'] = person.pop('looking_for_court_type')
+            person['court_name'] = court['name']
+            person['court_dx_number'] = court['dx_number']
+            person['distance'] = court['distance']
+
+            break
+
+    return person
+
+
+def add_courts_for_all_people(people: list[dict]) -> pd.DataFrame:
+
+    people_with_courts = []
+
+    for person in people:
+        person = get_court_for_person(person)
+        people_with_courts.append(person)
+
+    final_dataframe = pd.DataFrame(people_with_courts)
+
+    return final_dataframe
 
 
 if __name__ == "__main__":
     # [TODO]: write your answer here
-    courts = load_courts_near_postcode('LE23WL')
 
     people = load_people_from_csv("people.csv")
 
-    print(people)
+    people_with_courts = add_courts_for_all_people(people)
+
+    print(people_with_courts)
