@@ -3,6 +3,7 @@
 from datetime import datetime
 
 VALID_LOG_LEVEL = ['INFO', 'WARNING', 'TRACE']
+DATE_FORMAT = "%d/%m/%y %H:%M:%S"
 
 
 def check_is_valid_timestamp(timestamp: str) -> bool:
@@ -11,7 +12,7 @@ def check_is_valid_timestamp(timestamp: str) -> bool:
     if not isinstance(timestamp, str):
         raise TypeError("Timestamp must be a string")
     try:
-        datetime.strptime(timestamp, "%d/%m/%y %H:%M:%S")
+        datetime.strptime(timestamp, DATE_FORMAT)
         return True
     except ValueError:
         return False
@@ -52,7 +53,6 @@ def get_dict(line) -> dict:
         if check_is_valid_timestamp(timestamp) and message:
             if log_level in VALID_LOG_LEVEL:
                 return {"timestamp": timestamp, "log_level": log_level, "message": message}
-
 
 
 # YOU DON'T NEED TO CHANGE ANYTHING BELOW THIS LINE

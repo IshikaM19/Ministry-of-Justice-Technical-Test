@@ -30,12 +30,12 @@ def sum_current_time(time_str: str) -> int:
 
     list_of_nums = time_str.split(":")
 
-    final_list = []
+    final_list_of_nums = []
     for number in list_of_nums:
         number = int(number)
-        final_list.append(number)
+        final_list_of_nums.append(number)
 
-    return sum(final_list)
+    return sum(final_list_of_nums)
 
 
 if __name__ == "__main__":

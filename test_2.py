@@ -1,92 +1,38 @@
+"""Script that analyses the dataset of people and their desired court types, determining the distance
+to the nearest court of the specific court type specified for each person """
 
 import requests
 import pandas as pd
 
-# A team of analysts wish to discover how far people are travelling to their nearest
-# desired court. We have provided you with a small test dataset so you can find out if
-# it is possible to give the analysts the data they need to do this. The data is in
-# `people.csv` and contains the following columns:
-# - person_name
-# - home_postcode
-# - looking_for_court_type
-
-
-# Below is the first element of the JSON array from the above API call. We only want the
-# following keys from the json:
-# - name
-# - dx_number
-# - distance
-# dx_number is not always returned and the "types" field can be empty.
-
-"""
-[
-    {
-        "name": "Central London Employment Tribunal",
-        "lat": 51.5158158439741,
-        "lon": -0.118745425821452,
-        "number": null,
-        "cci_code": null,
-        "magistrate_code": null,
-        "slug": "central-london-employment-tribunal",
-        "types": [
-            "Tribunal"
-        ],
-        "address": {
-            "address_lines": [
-                "Victory House",
-                "30-34 Kingsway"
-            ],
-            "postcode": "WC2B 6EX",
-            "town": "London",
-            "type": "Visiting"
-        },
-        "areas_of_law": [
-            {
-                "name": "Employment",
-                "external_link": "https%3A//www.gov.uk/courts-tribunals/employment-tribunal",
-                "display_url": "<bound method AreaOfLaw.display_url of <AreaOfLaw: Employment>>",
-                "external_link_desc": "Information about the Employment Tribunal"
-            }
-        ],
-        "displayed": true,
-        "hide_aols": false,
-        "dx_number": "141420 Bloomsbury 7",
-        "distance": 1.29
-    },
-    etc
-]
-"""
+BASE_URL = "https://www.find-court-tribunal.service.gov.uk/search/results.json?postcode="
+NOT_FOUND = 404
+SERVER_ERROR = 500
+SUCCESS = 200
 
 
 def load_courts_near_postcode(postcode: str) -> list[dict]:
-    """Given a postcode, loads the top 10 nearest courts to that postcode"""
+    """
+    Given a postcode, loads the top 10 nearest courts to that postcode
+    as a list of dictionaries
+    """
 
     if not isinstance(postcode, str):
         raise TypeError('The postcode must be a string')
 
-    url = f"https://www.find-court-tribunal.service.gov.uk/search/results.json?postcode={postcode}"
+    url = f"{BASE_URL}{postcode}"
 
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
 
-    if response.status_code == 404:
+    if response.status_code == NOT_FOUND:
         raise ConnectionError('Not Found!')
 
-    if response.status_code == 500:
+    if response.status_code == SERVER_ERROR:
         raise ConnectionError('Server Error')
 
-    if response.status_code == 200:
+    if response.status_code == SUCCESS:
         data = response.json()
 
     return data
-# Use this API and the data in people.csv to determine how far each person's nearest
-# desired court is. Generate an output (of whatever format you feel is appropriate)
-# showing, for each person:
-# - name
-# - type of court desired
-# - home postcode
-# - nearest court of the right type
-# - the dx_number (if available) of the nearest court of the right type
-# - the distance to the nearest court of the right type
 
 
 def load_people_from_csv(filename: str) -> list[dict]:
@@ -96,12 +42,22 @@ def load_people_from_csv(filename: str) -> list[dict]:
 
     """
 
-    people = pd.read_csv(filename)
+    if not isinstance(filename, str):
+        raise TypeError('The filename needs to be a string')
 
-    return people.to_dict('records')
+    people_data = pd.read_csv(filename)
+
+    return people_data.to_dict('records')
 
 
 def get_court_for_person(person: dict) -> dict:
+    """
+    Given a person, as a dictionary, using the court type the person has requested
+    will find the closest court of that type and add it's details to the dictionary
+     e.g court name, dx number and distance from postcode """
+
+    if not isinstance(person, dict):
+        raise TypeError('Person needs to be a dictionary')
 
     postcode = person['home_postcode']
     court_type_wanted = person['looking_for_court_type']
@@ -126,6 +82,15 @@ def get_court_for_person(person: dict) -> dict:
 
 
 def add_courts_for_all_people(people: list[dict]) -> pd.DataFrame:
+    """
+    Given people as a list of dictionaries
+    will add the desired court information for each person
+    and then return a pandas Dataframe with columns:
+    person name, home postcode, type, court name, dx number and distance
+    """
+
+    if not isinstance(people, list):
+        raise TypeError('People needs to be a list of dictionaries')
 
     people_with_courts = []
 
@@ -139,10 +104,9 @@ def add_courts_for_all_people(people: list[dict]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    # [TODO]: write your answer here
 
     people = load_people_from_csv("people.csv")
 
-    people_with_courts = add_courts_for_all_people(people)
+    people_and_court = add_courts_for_all_people(people)
 
-    print(people_with_courts)
+    print(people_and_court)
