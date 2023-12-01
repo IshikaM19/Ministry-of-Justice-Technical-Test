@@ -1,39 +1,53 @@
-import datetime
+from datetime import datetime
 
-# [TODO]: step 1
-# Update the is_log_line function below to skip lines that are not valid log lines.
-# Valid log lines have a timestamp, error type, and message. For example, lines 1, 3,
-# 7 and 37 are all examples of lines (from sample.log) that would be filtered out.
-# There's no perfect way to do this: just decide what you think is reasonable to get
-# the test to pass. The only thing you are not allowed to do is filter out log lines
-# based on the exact row numbers you want to remove.
+
+def check_is_valid_timestamp(timestamp: str) -> bool:
+    """Checks is a timestamp string is a valid timestamp value"""
+
+    if not isinstance(timestamp, str):
+        raise TypeError("Timestamp must be a string")
+    try:
+        datetime.strptime(timestamp, "%d/%m/%y %H:%M:%S")
+        return True
+    except ValueError:
+        return False
 
 
 def is_log_line(line: str) -> bool:
     """Takes a log line and returns True if it is a valid log line and returns nothing
     if it is not.
     """
-    # Split the line into parts
+    if not isinstance(line, str):
+        raise TypeError("Line must be a string")
+
     parts = line.split()
 
-    if len(parts) > 4:
+    if len(parts) >= 4:
         timestamp = f"{parts[0]} {parts[1]}"
         error_type = parts[2]
-        message = parts[3:]  # list
+        message = " ".join(parts[3:])
+        if check_is_valid_timestamp(timestamp) and error_type and message:
+            return True
+    return False
 
-        return True
 
-
-# [TODO]: step 2
-# Update the get_dict function below so it converts a line of the logs into a
-# dictionary with keys for "timestamp", "log_level", and "message". The valid log
-# levels are `INFO`, `TRACE`, and `WARNING`. See lines 67 to 71 for how we expect the
-# results to look.
-def get_dict(line):
+def get_dict(line) -> dict:
     """Takes a log line and returns a dict with
     `timestamp`, `log_level`, `message` keys
     """
-    pass
+    if not isinstance(line, str):
+        raise TypeError("Line must be a string")
+
+    parts = line.split()
+
+    if len(parts) >= 4:
+        timestamp = f"{parts[0]} {parts[1]}"
+        log_level = parts[2]
+        message = " ".join(parts[3:])
+
+        if check_is_valid_timestamp(timestamp) and message:
+            if log_level in ["INFO", "WARNING", "TRACE"]:
+                return {"timestamp": timestamp, "log_level": log_level, "message": message}
 
 
 # YOU DON'T NEED TO CHANGE ANYTHING BELOW THIS LINE
