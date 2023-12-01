@@ -1,6 +1,18 @@
-# The below function doesn't work correctly. It should sum all the numbers at the
-# current time. For example, 01:02:03 should return 6. Improve and fix the function,
-# and write unit test(s) for it. Use any testing framework you're familiar with.
+"""This is a script that sums up the numbers in a timestamp"""
+
+from datetime import datetime
+
+
+def check_is_valid_timestamp(timestamp: str) -> bool:
+    """Checks is a timestamp string is a valid timestamp value"""
+
+    if not isinstance(timestamp, str):
+        raise TypeError("Timestamp must be a string")
+    try:
+        datetime.strptime(timestamp, "%H:%M:%S")
+        return True
+    except ValueError:
+        return False
 
 
 def sum_current_time(time_str: str) -> int:
@@ -9,6 +21,13 @@ def sum_current_time(time_str: str) -> int:
     The function returns the sum of all the numbers in the string
     For example, 01:02:03 should return 6.
     """
+
+    if not isinstance(time_str, str):
+        raise TypeError('The time_str input must be a string')
+
+    if not check_is_valid_timestamp(time_str):
+        raise ValueError("The input is not a valid time")
+
     list_of_nums = time_str.split(":")
 
     final_list = []
